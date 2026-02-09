@@ -84,12 +84,12 @@ fi
 echo ""
 echo "  ══════════════════════════════════════════"
 echo "   서버 시작 중..."
-echo "   브라우저에서 http://localhost:5000 접속하세요"
+echo "   브라우저에서 http://localhost:5001 접속하세요"
 echo "   종료하려면 Ctrl+C를 누르세요"
 echo "  ══════════════════════════════════════════"
 echo ""
 
 # 브라우저 자동 오픈 (2초 뒤)
-(sleep 2 && (xdg-open http://localhost:5000 2>/dev/null || open http://localhost:5000 2>/dev/null || true)) &
+(sleep 2 && (xdg-open http://localhost:5001 2>/dev/null || open http://localhost:5001 2>/dev/null || true)) &
 
 python run.py

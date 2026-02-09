@@ -27,15 +27,17 @@ if %errorlevel% neq 0 (
 )
 
 :: Python 버전 확인
-for /f "tokens=2 delims= " %%v in ('python --version 2^>^&1') do set PYVER=%%v
-echo  [OK] Python %PYVER% 감지됨
+for /f "tokens=*" %%v in ('python --version 2^>^&1') do set PYVER=%%v
+echo  [OK] %PYVER% 감지됨
 
 :: -- 2. 가상환경 확인/생성 --
 if not exist "%~dp0venv" (
-    echo  [..] 가상환경 생성 중... (최초 1회)
+    echo  [..] 가상환경 생성 중... - 최초 1회
     python -m venv "%~dp0venv"
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         echo  [ERROR] 가상환경 생성 실패
+        echo  Python 설치가 정상인지 확인하세요.
+        echo  Windows Store 버전이면 python.org에서 재설치하세요.
         pause
         exit /b 1
     )
@@ -49,9 +51,9 @@ echo  [OK] 가상환경 활성화됨
 :: -- 4. 의존성 설치 확인 --
 python -c "import fastapi" >nul 2>&1
 if %errorlevel% neq 0 (
-    echo  [..] 필요한 패키지 설치 중... (최초 1회, 1-2분 소요)
+    echo  [..] 필요한 패키지 설치 중... - 최초 1회, 1-2분 소요
     pip install -r "%~dp0requirements.txt" --quiet
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         echo  [ERROR] 패키지 설치 실패
         echo  인터넷 연결을 확인하세요.
         pause
@@ -91,13 +93,13 @@ if "%MODE%"=="remote" (
 echo.
 echo  ==========================================
 echo   서버 시작 중...
-echo   브라우저에서 http://localhost:5000 접속하세요
+echo   브라우저에서 http://localhost:5001 접속하세요
 echo   종료하려면 이 창을 닫거나 Ctrl+C를 누르세요
 echo  ==========================================
 echo.
 
 :: 브라우저 자동 오픈 (2초 뒤)
-start /b cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:5000"
+start /b cmd /c "timeout /t 2 /nobreak >nul && start http://localhost:5001"
 
 :: 서버 실행
 cd /d "%~dp0"

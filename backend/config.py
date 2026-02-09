@@ -25,7 +25,7 @@ class ProcessingConfig:
 @dataclass
 class ServerConfig:
     host: str = "0.0.0.0"
-    port: int = 5000
+    port: int = 5001
 
 
 @dataclass

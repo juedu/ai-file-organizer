@@ -21,6 +21,6 @@ COPY run.py .
 # 데이터/설정 볼륨 마운트 포인트
 RUN mkdir -p /app/config /app/data/profiles /app/data/manifests
 
-EXPOSE 5000
+EXPOSE 5001
 
 CMD ["python", "run.py"]

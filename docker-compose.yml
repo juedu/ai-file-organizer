@@ -3,7 +3,7 @@ services:
     build: .
     container_name: ai-file-organizer
     ports:
-      - "5000:5000"
+      - "5000:5001"
     volumes:
       - ./config:/app/config
       - ./data:/app/data
