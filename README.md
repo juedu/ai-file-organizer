@@ -1,2 +1,3 @@
-# FileCleanup
-AI 기반 파일 자동 정리 도구 - 개발 레포지토리
+# AI File Organizer
+
+AI 기반 파일 자동 정리 도구 - Ollama & FastAPI 기반
