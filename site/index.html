@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI File Organizer - AI로 파일을 자동 정리하세요</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0a0c14;
+            --bg2: #111420;
+            --bg3: #1a1d2e;
+            --border: #2a2e42;
+            --text: #e4e6f0;
+            --dim: #7a7e96;
+            --primary: #5b7ff6;
+            --primary-glow: rgba(91, 127, 246, 0.15);
+            --accent: #4caf80;
+            --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.7; }
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* ── Hero ── */
+        .hero {
+            text-align: center;
+            padding: 100px 24px 80px;
+            background: radial-gradient(ellipse at 50% 0%, var(--primary-glow) 0%, transparent 60%);
+        }
+        .hero-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--dim);
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: clamp(32px, 5vw, 56px);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+        }
+        .hero h1 span { color: var(--primary); }
+        .hero p {
+            font-size: 18px;
+            color: var(--dim);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        .hero-btns {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .btn-primary:hover { background: #4a6de5; text-decoration: none; }
+        .btn-secondary {
+            background: var(--bg3);
+            color: var(--text);
+        }
+        .btn-secondary:hover { border-color: var(--primary); text-decoration: none; }
+
+        /* ── Features ── */
+        .section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 24px;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .section-sub {
+            text-align: center;
+            color: var(--dim);
+            margin-bottom: 48px;
+            font-size: 16px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .feature-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            transition: border-color 0.2s;
+        }
+        .feature-card:hover { border-color: var(--primary); }
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: var(--primary-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+        .feature-card h3 { font-size: 17px; margin-bottom: 8px; }
+        .feature-card p { font-size: 14px; color: var(--dim); }
+
+        /* ── How It Works ── */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 32px;
+            counter-reset: step;
+        }
+        .step {
+            text-align: center;
+            position: relative;
+        }
+        .step::before {
+            counter-increment: step;
+            content: counter(step);
+            display: flex;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            font-size: 20px;
+            font-weight: 700;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+        .step h3 { font-size: 16px; margin-bottom: 8px; }
+        .step p { font-size: 14px; color: var(--dim); }
+
+        /* ── Requirements ── */
+        .req-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+        }
+        .req-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 24px;
+        }
+        .req-card h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .req-card p { font-size: 14px; color: var(--dim); }
+        .req-card a { font-size: 14px; }
+
+        /* ── Download Section ── */
+        .download-section {
+            background: var(--bg2);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .download-box {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .download-box h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+        .download-box p {
+            color: var(--dim);
+            margin-bottom: 24px;
+            font-size: 15px;
+        }
+        .code-block {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            text-align: left;
+            overflow-x: auto;
+            margin: 16px 0;
+            color: var(--accent);
+        }
+        .code-block .comment { color: var(--dim); }
+
+        /* ── Profiles ── */
+        .profile-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .profile-tag {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 18px;
+            font-size: 14px;
+        }
+        .profile-tag strong { display: block; margin-bottom: 4px; }
+        .profile-tag span { font-size: 12px; color: var(--dim); }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--dim);
+            font-size: 13px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 640px) {
+            .hero { padding: 60px 16px 50px; }
+            .section { padding: 50px 16px; }
+            .hero-btns { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-badge">v2.2 &mdash; Open Source &amp; Free</div>
+        <h1>AI로 파일을 <span>자동 정리</span>하세요</h1>
+        <p>
+            AI가 이미지, 문서, 다운로드 파일을
+            내용 기반으로 자동 분류하고 이름을 변경합니다.
+            프로그램을 다운받아 바로 사용하세요!
+        </p>
+        <div class="hero-btns">
+            <a href="#download" class="btn btn-primary">다운로드</a>
+            <a href="#how" class="btn btn-secondary">사용 방법 보기</a>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="section">
+        <h2 class="section-title">주요 기능</h2>
+        <p class="section-sub">AI가 파일의 내용을 보고 판단합니다</p>
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F9E0;</div>
+                <h3>AI 기반 분류</h3>
+                <p>파일명이 아닌 실제 내용(이미지, 텍스트)을 AI가 분석하여 폴더를 결정합니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F4DD;</div>
+                <h3>자동 리네이밍</h3>
+                <p>의미 없는 파일명(IMG_001.jpg)을 내용 기반 설명으로 자동 변경합니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F5C2;</div>
+                <h3>프로파일 시스템</h3>
+                <p>용도별 분류 규칙을 프로파일로 저장. 9가지 기본 프로파일 제공.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F310;</div>
+                <h3>원격 AI 지원</h3>
+                <p>Ollama가 없어도 OK! 원격 서버의 AI를 활용하여 분류합니다. 파일은 내 컴퓨터에서 정리됩니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x21A9;</div>
+                <h3>되돌리기 지원</h3>
+                <p>모든 작업은 기록되며 언제든 원래 상태로 복원할 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">&#x1F310;</div>
+                <h3>웹 브라우저 UI</h3>
+                <p>별도 앱 설치 없이 브라우저에서 사용. 실시간 진행 상황 표시.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section" id="how" style="background: var(--bg2); border-radius: 0; max-width: 100%; margin: 0;">
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <h2 class="section-title">사용 방법</h2>
+            <p class="section-sub">4단계로 간단하게</p>
+            <div class="steps">
+                <div class="step">
+                    <h3>프로그램 다운로드</h3>
+                    <p>프로그램을 다운받고 start.bat를 실행합니다</p>
+                </div>
+                <div class="step">
+                    <h3>서버 연결 설정</h3>
+                    <p>설정 페이지에서 원격 모드를 선택하고 API 키를 입력합니다</p>
+                </div>
+                <div class="step">
+                    <h3>폴더 선택 &amp; 분류</h3>
+                    <p>정리할 폴더를 선택하고 AI 분류를 시작합니다</p>
+                </div>
+                <div class="step">
+                    <h3>미리보기 &amp; 실행</h3>
+                    <p>분류 결과를 확인한 후 복사 또는 이동을 실행합니다</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Built-in Profiles -->
+    <section class="section">
+        <h2 class="section-title">기본 프로파일</h2>
+        <p class="section-sub">바로 사용할 수 있는 9가지 분류 프로파일</p>
+        <div class="profile-list">
+            <div class="profile-tag"><strong>기본 파일 정리</strong><span>파일 종류별 기본 분류</span></div>
+            <div class="profile-tag"><strong>그림 품질 분류</strong><span>퀄리티 기준 분류</span></div>
+            <div class="profile-tag"><strong>이미지 출처 분류</strong><span>출처/용도별 분류</span></div>
+            <div class="profile-tag"><strong>컨텐츠 수위 분류</strong><span>수위/노출 정도별</span></div>
+            <div class="profile-tag"><strong>문서 주제 분류</strong><span>문서 주제/용도별</span></div>
+            <div class="profile-tag"><strong>배경화면 해상도 분류</strong><span>해상도/비율 기준</span></div>
+            <div class="profile-tag"><strong>사진 정리</strong><span>촬영 장면/상황별</span></div>
+            <div class="profile-tag"><strong>다운로드 폴더 정리</strong><span>파일 종류별 정리</span></div>
+            <div class="profile-tag"><strong>밈/짤 정리</strong><span>감정/용도별 분류</span></div>
+        </div>
+    </section>
+
+    <!-- Requirements -->
+    <section class="section" style="background: var(--bg2); max-width: 100%; margin: 0;">
+        <div style="max-width: 1000px; margin: 0 auto;">
+            <h2 class="section-title">시스템 요구사항</h2>
+            <p class="section-sub">Python만 설치하면 됩니다 (Ollama 불필요!)</p>
+            <div class="req-grid">
+                <div class="req-card">
+                    <h3>&#x1F40D; Python 3.10+</h3>
+                    <p>프로그램 실행에 필요합니다.<br>설치 시 <strong>"Add Python to PATH"</strong>를 반드시 체크하세요.</p>
+                    <br>
+                    <a href="https://www.python.org/downloads/" target="_blank">python.org/downloads &rarr;</a>
+                </div>
+                <div class="req-card">
+                    <h3>&#x1F511; API 키</h3>
+                    <p>원격 AI 서버에 연결하기 위한 키입니다.<br>프로그램 실행 후 설정 페이지에서 입력하세요.</p>
+                    <br>
+                    <div class="code-block" style="margin-top: 12px;">
+                        <span class="comment"># 설정에서 입력할 정보:</span><br>
+                        서버 URL: 관리자에게 문의<br>
+                        API 키: 관리자에게 문의
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download -->
+    <section class="section download-section" id="download">
+        <div class="download-box">
+            <h3>다운로드 &amp; 설치</h3>
+            <p>ZIP 파일을 다운로드하고 압축을 풀면 끝!</p>
+
+            <a href="#" class="btn btn-primary" id="dlBtn" onclick="alert('GitHub Releases 페이지에서 최신 버전을 다운로드하세요.');return false;">
+                &#x1F4E5; ZIP 다운로드
+            </a>
+
+            <div class="code-block" style="margin-top: 24px;">
+                <span class="comment"># 또는 Git으로 클론:</span><br>
+                git clone https://github.com/juedu/ai-file-organizer.git<br>
+                cd ai-file-organizer
+            </div>
+
+            <p style="margin-top: 24px; font-size: 14px;">다운로드 후:</p>
+            <div class="code-block">
+                <span class="comment"># Windows: 더블클릭만 하면 됩니다</span><br>
+                start.bat<br><br>
+                <span class="comment"># Linux / macOS:</span><br>
+                chmod +x start.sh &amp;&amp; ./start.sh
+            </div>
+            <p style="font-size: 13px; color: var(--dim); margin-top: 16px;">
+                start.bat을 실행하면 자동으로 가상환경 생성, 패키지 설치, 서버 시작, 브라우저 오픈까지 처리됩니다.<br>
+                실행 후 <strong>설정 페이지</strong>에서 <strong>원격 모드</strong>를 선택하고 서버 URL과 API 키를 입력하세요.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>AI File Organizer &mdash; AI 기반 파일 자동 정리 도구</p>
+        <p style="margin-top: 8px;">Powered by Ollama &amp; FastAPI</p>
+    </footer>
+
+</body>
+</html>

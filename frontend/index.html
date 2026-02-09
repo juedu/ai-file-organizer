@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI File Organizer</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- 헤더 -->
+        <header class="app-header">
+            <h1 class="logo">AI File Organizer</h1>
+            <nav class="nav">
+                <button class="nav-btn active" data-page="home">홈</button>
+                <button class="nav-btn" data-page="profiles">프로파일</button>
+                <button class="nav-btn" data-page="history">이력</button>
+                <button class="nav-btn" data-page="settings">설정</button>
+            </nav>
+            <span class="mode-badge" id="modeBadge" title="연결 모드">LOCAL</span>
+            <div class="status-indicator" id="ollamaStatus" title="AI 상태">
+                <span class="dot"></span>
+                <span class="label">확인중...</span>
+            </div>
+        </header>
+
+        <!-- 페이지 컨테이너 -->
+        <main class="main-content">
+
+            <!-- 홈 / 스캔 페이지 -->
+            <section id="page-home" class="page active">
+
+                <!-- Ollama 미연결 가이드 (자동 표시/숨김) -->
+                <div class="section-card setup-guide hidden" id="ollamaGuide">
+                    <div class="guide-header">
+                        <h2>Ollama 설정 필요</h2>
+                        <button class="btn btn-sm" id="btnDismissGuide">닫기</button>
+                    </div>
+                    <p class="guide-desc">AI 분류 기능을 사용하려면 Ollama가 실행 중이어야 합니다.</p>
+                    <div class="guide-steps">
+                        <div class="guide-step">
+                            <strong>1. Ollama 설치</strong>
+                            <p><a href="https://ollama.ai" target="_blank">ollama.ai</a>에서 다운로드 후 설치하세요.</p>
+                        </div>
+                        <div class="guide-step">
+                            <strong>2. Vision 모델 다운로드</strong>
+                            <p>터미널에서 실행: <code>ollama pull llava:13b</code></p>
+                        </div>
+                        <div class="guide-step">
+                            <strong>3. 설정 페이지에서 모델 이름 입력</strong>
+                            <p><a href="#" onclick="document.querySelector('[data-page=settings]').click();return false;">설정 페이지</a>에서 사용할 모델명을 입력하세요.</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="btnRetryOllama">연결 다시 확인</button>
+                </div>
+
+                <div class="section-card">
+                    <h2>폴더 선택</h2>
+                    <div class="folder-browser">
+                        <div class="path-bar">
+                            <button class="btn btn-sm" id="btnBrowseUp" title="상위 폴더">&uarr;</button>
+                            <input type="text" id="inputPath" class="input-path" placeholder="경로를 입력하거나 아래에서 선택하세요">
+                            <button class="btn btn-primary btn-sm" id="btnScan">스캔</button>
+                        </div>
+                        <div class="folder-list" id="folderList"></div>
+                    </div>
+                </div>
+
+                <!-- 스캔 결과 -->
+                <div class="section-card hidden" id="scanResult">
+                    <div class="scan-header">
+                        <h2>스캔 결과</h2>
+                        <div class="scan-stats">
+                            <span id="scanTotal">0</span>개 파일 | <span id="scanSize">0 B</span>
+                        </div>
+                    </div>
+                    <div class="type-distribution" id="typeDist"></div>
+                    <div class="file-list-container">
+                        <table class="file-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="checkAll"></th>
+                                    <th class="th-thumb"></th>
+                                    <th>파일명</th>
+                                    <th>유형</th>
+                                    <th>크기</th>
+                                    <th>수정일</th>
+                                </tr>
+                            </thead>
+                            <tbody id="fileTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- 프로파일 선택 + 분류 시작 -->
+                    <div class="classify-bar">
+                        <label>프로파일:</label>
+                        <div class="profile-select-wrap">
+                            <select id="selectProfile" class="select-profile"></select>
+                            <span id="profileDesc" class="profile-select-desc"></span>
+                        </div>
+                        <span id="selectionInfo" class="selection-info"></span>
+                        <button class="btn btn-primary" id="btnClassify">분류 시작</button>
+                    </div>
+                </div>
+
+                <!-- 분류 결과 (미리보기) -->
+                <div class="section-card hidden" id="classifyResult">
+                    <div class="scan-header">
+                        <h2>분류 결과 미리보기</h2>
+                        <div class="scan-stats">
+                            성공 <span id="classifiedCount">0</span> | 오류 <span id="classifyErrors">0</span>
+                        </div>
+                    </div>
+                    <div class="folder-summary" id="folderSummary"></div>
+                    <div class="file-list-container">
+                        <table class="file-table">
+                            <thead>
+                                <tr>
+                                    <th class="th-thumb"></th>
+                                    <th>원본 파일명</th>
+                                    <th>대상 폴더</th>
+                                    <th>새 이름</th>
+                                    <th>설명</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody id="classifyTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="execute-bar">
+                        <label>모드:</label>
+                        <select id="selectMode">
+                            <option value="copy">복사</option>
+                            <option value="move">이동</option>
+                        </select>
+                        <button class="btn btn-primary" id="btnExecute">실행</button>
+                    </div>
+                </div>
+
+                <!-- 실행 결과 -->
+                <div class="section-card hidden" id="executeResult">
+                    <h2>실행 완료</h2>
+                    <div class="result-summary" id="resultSummary"></div>
+                    <button class="btn" id="btnUndoLast">되돌리기</button>
+                    <button class="btn btn-primary" id="btnNewScan">새로 시작</button>
+                </div>
+            </section>
+
+            <!-- 프로파일 관리 페이지 -->
+            <section id="page-profiles" class="page">
+                <div class="section-card">
+                    <div class="scan-header">
+                        <h2>분류 프로파일</h2>
+                        <button class="btn btn-primary" id="btnNewProfile">+ 새 프로파일</button>
+                    </div>
+                    <div class="profile-grid" id="profileGrid"></div>
+                </div>
+            </section>
+
+            <!-- 프로파일 편집 모달 -->
+            <div class="modal hidden" id="profileModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="modalTitle">프로파일 편집</h2>
+                        <button class="btn-close" id="btnCloseModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>이름</label>
+                            <input type="text" id="profName" placeholder="프로파일 이름">
+                        </div>
+                        <div class="form-group">
+                            <label>설명</label>
+                            <input type="text" id="profDesc" placeholder="프로파일 설명">
+                        </div>
+                        <div class="form-group">
+                            <label>AI 프롬프트</label>
+                            <textarea id="profPrompt" rows="3" placeholder="AI에게 보낼 분류 지시문"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>폴더 목록</label>
+                            <div id="folderInputs"></div>
+                            <button class="btn btn-sm" id="btnAddFolder">+ 폴더 추가</button>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>리네이밍 패턴</label>
+                                <input type="text" id="profRenamePattern" placeholder="{description}">
+                                <small class="hint">변수: {folder}, {description}, {date}, {original}</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="profEnableRename" checked>
+                                    리네이밍 활성화
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn" id="btnCancelProfile">취소</button>
+                        <button class="btn btn-primary" id="btnSaveProfile">저장</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 이력 페이지 -->
+            <section id="page-history" class="page">
+                <div class="section-card">
+                    <h2>작업 이력</h2>
+                    <div id="historyList" class="history-list"></div>
+                </div>
+            </section>
+
+            <!-- 설정 페이지 -->
+            <section id="page-settings" class="page">
+                <div class="section-card">
+                    <h2>연결 모드</h2>
+                    <div class="form-group">
+                        <label>AI 처리 모드</label>
+                        <select id="cfgMode">
+                            <option value="local">로컬 (내 PC에서 Ollama 직접 실행)</option>
+                            <option value="remote">원격 (외부 서버에 연결)</option>
+                        </select>
+                    </div>
+
+                    <!-- 로컬 모드 설정 -->
+                    <div id="localSettings">
+                        <div class="form-group">
+                            <label>Ollama URL</label>
+                            <input type="text" id="cfgOllamaUrl" placeholder="http://127.0.0.1:11434">
+                        </div>
+                        <div class="form-group">
+                            <label>모델</label>
+                            <input type="text" id="cfgModel" placeholder="모델 이름">
+                        </div>
+                        <div class="form-group">
+                            <label>타임아웃 (초)</label>
+                            <input type="number" id="cfgTimeout" min="10" max="600" value="120">
+                        </div>
+                    </div>
+
+                    <!-- 원격 모드 설정 -->
+                    <div id="remoteSettings" class="hidden">
+                        <div class="form-group">
+                            <label>서버 URL</label>
+                            <input type="text" id="cfgRemoteUrl" placeholder="http://close-ai.iptime.org:5000">
+                            <small class="hint">AI 서버의 주소를 입력하세요</small>
+                        </div>
+                        <div class="form-group">
+                            <label>API 키</label>
+                            <input type="text" id="cfgRemoteApiKey" placeholder="서버에서 발급받은 API 키">
+                            <small class="hint">서버 관리자에게 API 키를 받으세요</small>
+                        </div>
+                    </div>
+
+                    <!-- 서버 API 키 관리 (로컬 서버 운영자용) -->
+                    <div id="serverKeySection">
+                        <div class="form-group" style="border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px;">
+                            <label>서버 API 키 (클라이언트에게 제공)</label>
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" id="cfgServerApiKey" placeholder="미설정" readonly style="flex:1;">
+                                <button class="btn btn-sm" id="btnGenerateApiKey">키 생성</button>
+                            </div>
+                            <small class="hint">이 키를 원격 사용자에게 전달하면 당신의 AI를 사용할 수 있습니다</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <h2>일반 설정</h2>
+                    <div class="form-group">
+                        <label>기본 작업 모드</label>
+                        <select id="cfgOperationMode">
+                            <option value="copy">복사</option>
+                            <option value="move">이동</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="cfgRecursive">
+                            하위 폴더 재귀 스캔
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="cfgSkipHidden" checked>
+                            숨김 파일 제외
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="cfgSkipSystem" checked>
+                            시스템 파일 제외
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>언어</label>
+                        <select id="cfgLanguage">
+                            <option value="ko">한국어</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="btnSaveConfig">설정 저장</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- 진행 상황 오버레이 -->
+        <div class="progress-overlay hidden" id="progressOverlay">
+            <div class="progress-card">
+                <h3 id="progressTitle">처리 중...</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p class="progress-text"><span id="progressCurrent">0</span> / <span id="progressTotal">0</span></p>
+                <p class="progress-file" id="progressFile"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 이미지 라이트박스 -->
+    <div class="lightbox hidden" id="lightbox">
+        <img id="lightboxImg" src="" alt="">
+    </div>
+
+    <!-- Toast 컨테이너 -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
